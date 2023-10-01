@@ -3,6 +3,8 @@
 Public Class Registration
     Public dbService As DatabaseService
 
+
+
     Private Sub btnRegister_Click(sender As Object, e As EventArgs) Handles btnRegister.Click
         ' Get the entered registration details
         Dim username As String = txtRegUsername.Text
@@ -15,11 +17,14 @@ Public Class Registration
 
         dbService = New DatabaseService()
 
+
+
+
         user.SetRole(role)
         user.SetUserName(username)
         user.SetPassword(password)
-        user.SetFullName(fullName)
         user.SetPending(True)
+        user.SetFullName(fullName)
         user.SetBirthDate(birthday)
         user.SetAge(age)
 
@@ -42,10 +47,5 @@ Public Class Registration
         Me.Hide()
     End Sub
 
-    Private Sub UsertableBindingNavigatorSaveItem_Click(sender As Object, e As EventArgs)
-        Me.Validate()
-        Me.UsertableBindingSource.EndEdit()
-        Me.TableAdapterManager.UpdateAll(Me.Database1DataSet)
 
-    End Sub
 End Class

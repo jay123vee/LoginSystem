@@ -1,6 +1,8 @@
 ﻿Imports System.IO
 
 Public Class Login
+    Public dbService As DatabaseService
+
     Private login_attempt As Integer = 0
     Private loginTimer As New Timer()
 
@@ -11,34 +13,35 @@ Public Class Login
     End Sub
 
     Private Sub btnLogin_Click(sender As Object, e As EventArgs) Handles btnLogin.Click
+        dbService = New DatabaseService()
+
+        Dim user = dbService.getUserByUserName(txtUsername.Text)
+
+
+
+        If user Is Nothing Then
+            MsgBox("User not found.")
+            login_attempt += 1
+        Else
+            If txtPassword.Text <> user.GetPassword Then
+                MsgBox("Invalid Credentials.")
+                login_attempt += 1
+            Else
+                If user IsNot Nothing AndAlso user.GetRole() = "user" AndAlso Not user.GetPending() Then
+                    'redirect to user form
+                End If
+
+                If user IsNot Nothing AndAlso user.GetRole() = "admin" AndAlso Not user.GetPending() Then
+                    'redirect to admin form
+                End If
+            End If
+        End If
+
         ' Login Attempts
         If login_attempt >= 3 Then
             Me.Enabled = False
             loginTimer.Start()
             Return
-        End If
-
-        ' Get the entered username and password
-        Dim enteredUsername As String = txtUsername.Text
-        Dim enteredPassword As String = txtPassword.Text
-
-        If txtUsername.Text = "" AndAlso txtPassword.Text = "" Then
-            MsgBox("Enter username and password")
-        ElseIf UserExists(enteredUsername) Then
-            If CheckLogin(enteredUsername, enteredPassword) Then
-                MsgBox("Login successful.")
-                Welcome.Show()
-                Me.Hide()
-            Else
-                login_attempt += 1
-                MsgBox("Login failed. Please check your password.")
-                txtPassword.Clear()
-                txtPassword.Focus()
-            End If
-        Else
-            MsgBox("User not found. Please check your username.")
-            txtUsername.Clear()
-            txtUsername.Focus()
         End If
     End Sub
 
@@ -63,54 +66,4 @@ Public Class Login
         Registration.Show()
         Me.Hide()
     End Sub
-
-    ' Function to check if the entered username exists in the stored data
-    Private Function UserExists(username As String) As Boolean
-        ' Read the registration data from your text file (change the file path)
-        Dim filePath As String = Path.Combine(Application.StartupPath, "Users.txt")
-
-        Try
-            ' Read all lines from the text file
-            Dim lines() As String = System.IO.File.ReadAllLines(filePath)
-
-            ' Loop through each line and check for a matching username
-            For Each line As String In lines
-                Dim fields() As String = line.Split(","c)
-                If fields.Length = 4 AndAlso fields(0) = username Then
-                    ' Username exists in the data
-                    Return True
-                End If
-            Next
-        Catch ex As Exception
-            ' Handle file reading errors (e.g., file not found)
-        End Try
-
-        ' If no matching username was found, return false
-        Return False
-    End Function
-
-    ' Function to check login credentials
-    Private Function CheckLogin(username As String, password As String) As Boolean
-        ' Read the registration data from your text file (change the file path)
-        Dim filePath As String = Path.Combine(Application.StartupPath, "Users.txt")
-
-        Try
-            ' Read all lines from the text file
-            Dim lines() As String = System.IO.File.ReadAllLines(filePath)
-
-            ' Loop through each line and check for a matching username, password, and status
-            For Each line As String In lines
-                Dim fields() As String = line.Split(","c)
-                If fields.Length = 4 AndAlso fields(0) = username AndAlso fields(1) = password AndAlso fields(3) = "Approved" Then
-                    ' Username, password, and status match, user is authenticated
-                    Return True
-                End If
-            Next
-        Catch ex As Exception
-            ' Handle file reading errors (e.g., file not found)
-        End Try
-
-        ' If no matching user was found, or the password doesn't match, return false
-        Return False
-    End Function
 End Class
