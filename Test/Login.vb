@@ -2,6 +2,7 @@
 
 Public Class Login
     Public dbService As DatabaseService
+    Public encryptService As EncryptionService
 
     Private login_attempt As Integer = 0
     Private loginTimer As New Timer()
@@ -14,6 +15,7 @@ Public Class Login
 
     Private Sub btnLogin_Click(sender As Object, e As EventArgs) Handles btnLogin.Click
         dbService = New DatabaseService()
+        encryptService = New EncryptionService()
 
         Dim user = dbService.getUserByUserName(txtUsername.Text)
 
@@ -23,7 +25,14 @@ Public Class Login
             MsgBox("User not found.")
             login_attempt += 1
         Else
-            If txtPassword.Text <> user.GetPassword Then
+
+            Dim encryptedPassword = encryptService.EncryptText(txtPassword.Text, encryptService.GenerateRandomKey(), encryptService.GenerateRandomIV())
+
+            Console.WriteLine(encryptedPassword)
+
+
+            If encryptedPassword <> user.GetPassword Then
+
                 MsgBox("Invalid Credentials.")
                 login_attempt += 1
             Else

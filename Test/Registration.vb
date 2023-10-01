@@ -2,6 +2,8 @@
 
 Public Class Registration
     Public dbService As DatabaseService
+    Public encryptService As EncryptionService
+
 
 
 
@@ -16,13 +18,18 @@ Public Class Registration
         Dim user As New User()
 
         dbService = New DatabaseService()
+        encryptService = New EncryptionService()
 
 
 
+
+
+        Dim encryptedPassword = encryptService.EncryptText(password, encryptService.GenerateRandomKey(), encryptService.GenerateRandomIV())
+        user.SetPassword(encryptedPassword)
 
         user.SetRole(role)
         user.SetUserName(username)
-        user.SetPassword(password)
+        'user.SetPassword(password)
         user.SetPending(True)
         user.SetFullName(fullName)
         user.SetBirthDate(birthday)
